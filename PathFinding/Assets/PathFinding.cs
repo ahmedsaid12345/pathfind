@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Diagnostics;
 
 public class PathFinding : MonoBehaviour
 {
@@ -12,25 +13,31 @@ public class PathFinding : MonoBehaviour
 
     public void FindPath(Vector3 startpos,Vector3 targetpos)
     {
+        Stopwatch SW = new Stopwatch();
+        SW.Start();
         Node StartNode = grid.NodeFromWorldPoint(startpos);
         Node TargetNode = grid.NodeFromWorldPoint(targetpos);
-        List<Node> OpenSet = new List<Node>();
+        Heap<Node> OpenSet = new Heap<Node>(grid.MaxSize);
         HashSet<Node> ClosedSet = new HashSet<Node>();
         OpenSet.Add(StartNode);
         while (OpenSet.Count > 0)
         {
-            Node CurrentNode=OpenSet[0];
-            for (int i=1;i<OpenSet.Count;i++)
-            {
-                if (CurrentNode.F_Cost>OpenSet[i].F_Cost || (CurrentNode.F_Cost == OpenSet[i].F_Cost && CurrentNode.H_Cost > OpenSet[i].H_Cost))
-                {
-                    CurrentNode = OpenSet[i];
-                }
-            }
-            OpenSet.Remove(CurrentNode);
+            Node CurrentNode = OpenSet.RemoveFirst();
+           // for (int i=1;i<OpenSet.Count;i++)
+            //{
+             //   if (CurrentNode.F_Cost > OpenSet[i].F_Cost || (CurrentNode.F_Cost == OpenSet[i].F_Cost && CurrentNode.H_Cost > OpenSet[i].H_Cost))
+              //  {
+               //     CurrentNode = OpenSet[i];
+                //}
+            //}
+
+            //OpenSet.Remove(CurrentNode);
             ClosedSet.Add(CurrentNode);
             if (CurrentNode == TargetNode)
             {
+                SW.Stop();
+                print("path found in " + SW.ElapsedMilliseconds+"ms");
+             //  UnityEngine.Debug.Log("HI");
                 TracePath(StartNode,TargetNode);
                 return;
             }
@@ -90,7 +97,8 @@ public class PathFinding : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        FindPath(Seeker.position, Target.position);
-         
+        if (Input.GetButtonDown("Jump")) {
+            FindPath(Seeker.position, Target.position);
+        }
     }
 }
